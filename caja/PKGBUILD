@@ -1,0 +1,50 @@
+# Maintainer : Adam Erdman <hekel(at)archlinux.info>
+# Contributor : Martin Wimpress <code@flexion.org>
+
+_ver=1.12
+_pkgbase=caja
+pkgname=${_pkgbase}-h
+pkgver=${_ver}.6
+pkgrel=1
+pkgdesc="File manager for the MATE desktop patched to re-enable desktop management in non-MATE environments (GTK2 version)"
+url="http://mate-desktop.org"
+arch=('i686' 'x86_64')
+license=('GPL')
+depends=('dbus' 'desktop-file-utils' 'exempi' 'gtk2' 'gvfs' 'libexif'
+         'libunique' 'libxt' 'mate-desktop>=1.12'
+         'startup-notification')
+makedepends=('gobject-introspection' 'mate-common')
+optdepends=('gstreamer: automatic media playback when mouseover'
+            'gvfs-smb: To connect to Samba/Windows shares')
+groups=('mate')
+conflicts=("${_pkgbase}-gtk3" 'caja')
+provides=('caja=1.12.6')
+source=("http://pub.mate-desktop.org/releases/${_ver}/${_pkgbase}-${pkgver}.tar.xz"
+        "0000_revert_desktop_management_non_mate.diff")
+sha1sums=('8e69164061fb8d21d2f887d1321b94d5225abe02'
+          '13ef3d983d28ee50307a1994656d2e3d8458022a')
+install=${pkgname}.install
+
+prepare() {
+    cd "${srcdir}/${_pkgbase}-${pkgver}"
+    ### Re-enable desktop management for non mate sessions
+    # https://github.com/mate-desktop/caja/commit/23b75da
+    patch -Np1 -i "${srcdir}/0000_revert_desktop_management_non_mate.diff"
+}
+build() {
+    cd "${srcdir}/${_pkgbase}-${pkgver}"
+    ./configure \
+        --prefix=/usr \
+        --libexecdir=/usr/lib/${_pkgbase} \
+        --with-gtk=2.0 \
+        --enable-unique \
+        --enable-introspection \
+        --disable-static \
+        --disable-update-mimedb
+    make
+}
+
+package() {
+    cd "${srcdir}/${_pkgbase}-${pkgver}"
+    make DESTDIR="${pkgdir}" install
+}

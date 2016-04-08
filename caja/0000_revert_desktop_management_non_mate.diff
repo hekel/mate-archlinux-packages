@@ -1,0 +1,37 @@
+diff --git a/src/caja-main.c b/src/caja-main.c
+index 9547778..024c194 100644
+--- a/src/caja-main.c
++++ b/src/caja-main.c
+@@ -315,14 +315,6 @@ setup_debug_log (void)
+ }
+ 
+ static gboolean
+-running_in_mate (void)
+-{
+-    return (g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "MATE") == 0)
+-        || (g_strcmp0 (g_getenv ("XDG_SESSION_DESKTOP"), "MATE") == 0)
+-        || (g_strcmp0 (g_getenv ("DESKTOP_SESSION"), "MATE") == 0);
+-}
+-
+-static gboolean
+ running_as_root (void)
+ {
+     return geteuid () == 0;
+@@ -479,7 +471,7 @@ main (int argc, char *argv[])
+         no_default_window = TRUE;
+         no_desktop = FALSE;
+     }
+-    else if (running_as_root () || !running_in_mate ())
++    else if (running_as_root ())
+     {
+         /* do not manage desktop when running as root or on other desktops */
+         no_desktop = TRUE;
+@@ -525,7 +517,7 @@ main (int argc, char *argv[])
+      * on other desktops or when running caja as root. Otherwise, we read the value
+      * from the configuration.
+      */
+-    if (running_in_mate () && !running_as_root())
++    if (no_desktop == TRUE && !running_as_root())
+     {
+         exit_with_last_window = g_settings_get_boolean (caja_preferences, CAJA_PREFERENCES_EXIT_WITH_LAST_WINDOW);
+     }
